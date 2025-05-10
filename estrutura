@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skate Runner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; overflow: hidden; background: #222; }
+    #game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(#333, #111);
+    }
+    .skater {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: limegreen;
+      bottom: 0;
+      left: 100px;
+      border-radius: 10px;
+    }
+    .obstacle {
+      position: absolute;
+      width: 30px;
+      height: 25px;
+      background: crimson;
+      bottom: 0;
+    }
+    #skate {
+      position: absolute;
+      width: 60px;
+      height: 10px;
+      background: black;
+      bottom: -10px;
+      left: -5px;
+      border-radius: 5px;
+    }
+    .wheel {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: gray;
+      border-radius: 50%;
+      bottom: -5px;
+    }
+    .wheel.left { left: 0px; }
+    .wheel.right { right: 0px; }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div class="skater" id="skater">
+      <div id="skate">
+        <div class="wheel left"></div>
+        <div class="wheel right"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const skater = document.getElementById("skater");
+    let vy = 0;
+    let y = 0;
+    let gravity = 1;
+    let isJumping = false;
+    let jumpCount = 0;
+    const jumpStrength = 15;
+    const groundLevel = 0;
+    let obstacleTimer = 0;
+
+    function gameLoop() {
+      if (isJumping) {
+        vy -= gravity;
+        y += vy;
+        if (y <= groundLevel) {
+          y = groundLevel;
+          isJumping = false;
+          jumpCount = 0;
+          vy = 0;
+        }
+        skater.style.bottom = `${y}px`;
+        if (jumpCount === 2) {
+          skater.style.background = 'deepskyblue';
+        } else {
+          skater.style.background = 'limegreen';
+        }
+      }
+
+      document.querySelectorAll(".obstacle").forEach(ob => {
+        let left = parseInt(ob.style.left);
+        ob.style.left = `${left - 5}px`;
+        if (left < -50) ob.remove();
+      });
+
+      obstacleTimer++;
+      if (obstacleTimer % 600 === 0) createObstacle();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function createObstacle() {
+      const obs = document.createElement("div");
+      obs.className = "obstacle";
+      obs.style.left = `${window.innerWidth}px`;
+      game.appendChild(obs);
+    }
+
+    document.addEventListener("keydown", e => {
+      if ((e.code === "Space" || e.key === ' ') && jumpCount < 2) {
+        isJumping = true;
+        vy = jumpStrength;
+        jumpCount++;
+      }
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
